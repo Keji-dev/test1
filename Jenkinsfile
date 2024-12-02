@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        PYTHON_ENV = "python3"  // Usa el intérprete de Python que prefieras
+        PYTHON_ENV = "python3"  // Define el intérprete de Python
     }
 
     stages {
@@ -13,26 +13,31 @@ pipeline {
             }
         }
 
+        stage('Setup Environment') {
+            steps {
+                script {
+                    // Crear entorno virtual y activarlo
+                    sh "${PYTHON_ENV} -m venv venv"
+                    sh "./venv/bin/python -m pip install --upgrade pip"
+                }
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
                 script {
-                    sh '''
-                    #!/bin/bash
-                    python3 -m venv venv
-                    source venv/bin/activate
-                    '''
+                    // Instalar dependencias
+                    sh "./venv/bin/pip install build"
+                    sh "./venv/bin/pip install -r requirements.txt"
                 }
             }
         }
 
         stage('Run Tests') {
             steps {
-                // Ejecutar las pruebas usando pytest
                 script {
-                    sh '''
-                    source venv/bin/activate
-                    pytest test_main.py
-                    '''
+                    // Ejecutar pruebas con reporte compatible con Jenkins
+                    sh "./venv/bin/pytest --junitxml=results.xml"
                 }
             }
         }
@@ -40,6 +45,9 @@ pipeline {
 
     post {
         always {
+            // Publicar reportes de pruebas
+            junit 'results.xml'
+
             // Limpiar el entorno virtual
             sh 'rm -rf venv'
         }
