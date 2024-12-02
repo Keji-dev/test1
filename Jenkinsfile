@@ -1,16 +1,15 @@
 pipeline {
     agent any
-    
+
     environment {
-        // Define variables de entorno que puedan ser reutilizadas
-        IMAGE_NAME = 'python:3.9-slim'  // Imagen de Docker a utilizar
-        WORKSPACE = '/var/jenkins_home/workspace/test1'  // Ruta del workspace en Jenkins
+        IMAGE_NAME = 'python:3.9-slim'
+        WORKSPACE = '/var/jenkins_home/workspace/test1'
+        DOCKER_TOOL = 'docker' // Aquí defines el nombre del Docker Tool que has configurado
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Hacer checkout desde el repositorio Git
                 git url: 'https://github.com/Keji-dev/test1.git', branch: 'main'
             }
         }
@@ -18,7 +17,6 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // Ejecutar los pasos de build si es necesario, aquí no es necesario
                     echo "No hay necesidad de build, usaremos la imagen directamente."
                 }
             }
@@ -27,11 +25,11 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Usar Docker para ejecutar los comandos en el contenedor
-                    docker.image(IMAGE_NAME).inside {
-                        // Ejecutar los comandos dentro del contenedor Docker
-                        sh 'pip install --no-cache-dir -r requirements.txt'  // Instalar dependencias
-                        sh 'pytest'  // Ejecutar las pruebas
+                    docker.withTool(DOCKER_TOOL) { // Usa dockerTool si es necesario
+                        docker.image(IMAGE_NAME).inside {
+                            sh 'pip install --no-cache-dir -r requirements.txt'
+                            sh 'pytest'
+                        }
                     }
                 }
             }
@@ -46,8 +44,7 @@ pipeline {
 
     post {
         always {
-            // Este bloque se ejecutará siempre, incluso si el pipeline falla
-            cleanWs()  // Limpiar el workspace de Jenkins
+            cleanWs()
         }
     }
 }
