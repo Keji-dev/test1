@@ -27,7 +27,7 @@ pipeline {
             steps {
                 script {
                     // Instalar dependencias
-                    sh "./venv/bin/pip pip freeze > requirements.txt"
+                    sh "./venv/bin/pip freeze > requirements.txt"
                     sh "./venv/bin/pip install -r requirements.txt"
                 }
             }
