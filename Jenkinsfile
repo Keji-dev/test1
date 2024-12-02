@@ -13,17 +13,13 @@ pipeline {
             }
         }
 
-
         stage('Install Dependencies') {
             steps {
-                // Instalar las dependencias desde requirements.txt
                 script {
                     sh '''
-                    # Crear un entorno virtual y activarlo
+                    #!/bin/bash
                     python3 -m venv venv
                     source venv/bin/activate
-                    # Instalar las dependencias
-                    pip install -r requirements.txt
                     '''
                 }
             }
