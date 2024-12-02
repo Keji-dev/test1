@@ -8,10 +8,11 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                // Clonar el repositorio
-                git 'https://github.com/Keji-dev/test1.git'
+                // Clonar la rama correcta del repositorio
+                git branch: 'main', url: 'https://github.com/Keji-dev/test1.git'
             }
         }
+
 
         stage('Install Dependencies') {
             steps {
