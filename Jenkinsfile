@@ -9,7 +9,8 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 // Clonar el repositorio
-                git 'https://tu-repositorio.git'
+                git 'https://github.com/Keji-dev/test1.git'
+'
             }
         }
 
