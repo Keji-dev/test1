@@ -2,49 +2,49 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'python:3.9-slim'
-        WORKSPACE = '/var/jenkins_home/workspace/test1'
-        DOCKER_TOOL = 'docker' // Aquí defines el nombre del Docker Tool que has configurado
+        PYTHON_ENV = "python3"  // Usa el intérprete de Python que prefieras
     }
 
     stages {
-        stage('Checkout') {
+        stage('Clone Repository') {
             steps {
-                git url: 'https://github.com/Keji-dev/test1.git', branch: 'main'
+                // Clonar el repositorio
+                git 'https://tu-repositorio.git'
             }
         }
 
-        stage('Build') {
+        stage('Install Dependencies') {
             steps {
+                // Instalar las dependencias desde requirements.txt
                 script {
-                    echo "No hay necesidad de build, usaremos la imagen directamente."
+                    sh '''
+                    # Crear un entorno virtual y activarlo
+                    python3 -m venv venv
+                    source venv/bin/activate
+                    # Instalar las dependencias
+                    pip install -r requirements.txt
+                    '''
                 }
             }
         }
 
-        stage('Test') {
+        stage('Run Tests') {
             steps {
+                // Ejecutar las pruebas usando pytest
                 script {
-                    docker.withTool(DOCKER_TOOL) { // Usa dockerTool si es necesario
-                        docker.image(IMAGE_NAME).inside {
-                            sh 'pip install --no-cache-dir -r requirements.txt'
-                            sh 'pytest'
-                        }
-                    }
+                    sh '''
+                    source venv/bin/activate
+                    pytest test_main.py
+                    '''
                 }
-            }
-        }
-
-        stage('Post Actions') {
-            steps {
-                echo 'Pipeline terminado.'
             }
         }
     }
 
     post {
         always {
-            cleanWs()
+            // Limpiar el entorno virtual
+            sh 'rm -rf venv'
         }
     }
 }
