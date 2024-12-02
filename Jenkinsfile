@@ -1,24 +1,25 @@
 pipeline {
-    agent any  // Esto le dice a Jenkins que ejecute en cualquier agente disponible
-
+    agent any
+    
     environment {
-        DOCKER_IMAGE = 'python:3.9-slim'  // Imagen Docker que usarás
+        // Define variables de entorno que puedan ser reutilizadas
+        IMAGE_NAME = 'python:3.9-slim'  // Imagen de Docker a utilizar
+        WORKSPACE = '/var/jenkins_home/workspace/test1'  // Ruta del workspace en Jenkins
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Descargar el código fuente desde el repositorio
-                checkout scm
+                // Hacer checkout desde el repositorio Git
+                git url: 'https://github.com/Keji-dev/test1.git', branch: 'main'
             }
         }
 
         stage('Build') {
             steps {
                 script {
-                    // Construir la imagen Docker si es necesario
-                    // Si ya tienes el contenedor en ejecución, puedes omitir esta parte
-                    echo 'No hay necesidad de build, usaremos la imagen directamente.'
+                    // Ejecutar los pasos de build si es necesario, aquí no es necesario
+                    echo "No hay necesidad de build, usaremos la imagen directamente."
                 }
             }
         }
@@ -26,19 +27,27 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Ejecutar pruebas en el contenedor Docker
-                    sh """
-                    docker run --rm -v \$(pwd):/app:z -w /app $DOCKER_IMAGE bash -c "pip install --no-cache-dir -r requirements.txt && pytest"
-                    """
+                    // Usar Docker para ejecutar los comandos en el contenedor
+                    docker.image(IMAGE_NAME).inside {
+                        // Ejecutar los comandos dentro del contenedor Docker
+                        sh 'pip install --no-cache-dir -r requirements.txt'  // Instalar dependencias
+                        sh 'pytest'  // Ejecutar las pruebas
+                    }
                 }
+            }
+        }
+
+        stage('Post Actions') {
+            steps {
+                echo 'Pipeline terminado.'
             }
         }
     }
 
     post {
         always {
-            // Limpiar después de ejecutar el pipeline si es necesario
-            echo 'Pipeline terminado.'
+            // Este bloque se ejecutará siempre, incluso si el pipeline falla
+            cleanWs()  // Limpiar el workspace de Jenkins
         }
     }
 }
