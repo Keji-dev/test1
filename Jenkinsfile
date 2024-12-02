@@ -10,7 +10,6 @@ pipeline {
             steps {
                 // Clonar el repositorio
                 git 'https://github.com/Keji-dev/test1.git'
-'
             }
         }
 
